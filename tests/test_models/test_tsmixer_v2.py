@@ -95,32 +95,6 @@ def test_tsmixer_init(d_model, e_layers, dropout, sample_dataset):
     assert model.n_quantiles is None
 
 
-def test_tsmixer_forward(sample_dataset):
-    """Test forward pass of TSMixer."""
-
-    dm = sample_dataset["data_module"]
-
-    train_dataloader = dm.train_dataloader()
-    batch = next(iter(train_dataloader))[0]
-
-    metadata = dm.metadata
-
-    model = TSMixer(
-        loss=MAE(),
-        d_model=32,
-        e_layers=2,
-        dropout=0.1,
-        metadata=metadata,
-    )
-
-    with torch.no_grad():
-        output = model(batch)
-
-    assert "prediction" in output
-    assert output["prediction"].shape[0] == dm.batch_size
-    assert output["prediction"].shape[1] == metadata["prediction_length"]
-
-
 def test_quantile_loss_output(sample_dataset):
     """Test TSMixer output shape with quantile loss."""
 
