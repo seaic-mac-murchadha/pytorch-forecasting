@@ -10,7 +10,6 @@ TSMixer model for PyTorch Forecasting.
 #################################################
 
 from typing import Any
-import warnings
 
 import torch
 import torch.nn as nn
@@ -35,6 +34,7 @@ class TSMixerBlock(nn.Module):
     dropout : float
         Probability of an element to be zeroed.
     """
+
     def __init__(
         self,
         sequence_length: int,
@@ -143,12 +143,6 @@ class TSMixer(TslibBaseModel):
             lr_scheduler=lr_scheduler,
             lr_scheduler_params=lr_scheduler_params,
             metadata=metadata,
-        )
-
-        warnings.warn(
-            "TSMixer is an experimental model implemented on TslibBaseModelV2. "
-            "It is an unstable version and may be subject to unannounced changes. "
-            "Please use with caution."
         )
 
         self.d_model = d_model
