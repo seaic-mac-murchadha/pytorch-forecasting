@@ -21,6 +21,20 @@ from pytorch_forecasting.models.base._tslib_base_model_v2 import TslibBaseModel
 
 
 class TSMixerBlock(nn.Module):
+    """
+    TSMixer block for applying the time-mixing and feature-mixing MLPs.
+
+    Parameters
+    ----------
+    sequence_length : int
+        Length of the lookback window containing past time steps.
+    num_features : int
+        Number of expected features in the input.
+    hidden_dim : int
+        Dimension of the hidden layers.
+    dropout : float
+        Probability of an element to be zeroed.
+    """
     def __init__(
         self,
         sequence_length: int,
@@ -45,6 +59,19 @@ class TSMixerBlock(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Apply time-mixing and feature-mixing to the input tensor.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input tensor.
+
+        Returns
+        -------
+        torch.Tensor
+            Output tensor with time-mixing and feature-mixing applied.
+        """
         x = x + self.temporal(x.transpose(1, 2)).transpose(1, 2)
         x = x + self.channel(x)
 
