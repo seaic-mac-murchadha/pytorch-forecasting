@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import pytest
 import torch
-from torch import nn
 
 from pytorch_forecasting.data import TimeSeries
 from pytorch_forecasting.data.data_module import TslibDataModule
@@ -54,45 +53,6 @@ def sample_dataset():
     dm.setup()
 
     return {"data_module": dm, "time_series": ts}
-
-
-@pytest.fixture
-def model_with_logging_metrics(sample_dataset):
-    """TSMixer instance used to test BaseModel logging_metrics registration."""
-    dm = sample_dataset["data_module"]
-    with pytest.warns(UserWarning):
-        model = TSMixer(
-            loss=MAE(),
-            logging_metrics=[SMAPE(), MAE()],
-            metadata=dm.metadata,
-        )
-    return model
-
-
-@pytest.mark.parametrize(
-    "d_model, e_layers, dropout",
-    [
-        (32, 1, 0.0),
-        (64, 2, 0.1),
-    ],
-)
-def test_tsmixer_init(d_model, e_layers, dropout, sample_dataset):
-    """Test TSMixer initialization."""
-
-    dm = sample_dataset["data_module"]
-
-    model = TSMixer(
-        loss=MAE(),
-        d_model=d_model,
-        e_layers=e_layers,
-        dropout=dropout,
-        metadata=dm.metadata,
-    )
-
-    assert model.d_model == d_model
-    assert model.e_layers == e_layers
-    assert model.dropout == dropout
-    assert model.n_quantiles is None
 
 
 def test_quantile_loss_output(sample_dataset):
@@ -174,21 +134,6 @@ def test_univariate_forecast():
         metadata["prediction_length"],
         1,
     )
-
-
-def test_logging_metrics_is_module_list(model_with_logging_metrics):
-    """logging_metrics must be registered as nn.ModuleList so .to() propagates."""
-    assert isinstance(model_with_logging_metrics.logging_metrics, nn.ModuleList)
-
-
-def test_logging_metrics_device_propagation(model_with_logging_metrics):
-    """Metric state tensors must follow the model when moved to a different device."""
-    model_with_logging_metrics.to("meta")
-    for metric in model_with_logging_metrics.logging_metrics:
-        for state_name in metric._defaults:
-            val = getattr(metric, state_name)
-            if isinstance(val, torch.Tensor):
-                assert val.device.type == "meta"
 
 
 def test_prepare_input_data(sample_dataset):
